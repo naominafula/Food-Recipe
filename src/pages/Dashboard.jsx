@@ -1,65 +1,105 @@
-import RecipeCard from '../components/RecipeCard'
 
-const recipes = [
-  {
-    id: 1,
-    title: 'Golden Coconut Curry',
-    category: 'Dinner',
-    time: '35 min',
-    rating: 4.9,
-    description: 'A cozy curry packed with vegetables and aromatic spices.',
-    image:
-      'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 2,
-    title: 'Herb Garden Salad',
-    category: 'Healthy',
-    time: '15 min',
-    rating: 4.8,
-    description: 'Crisp greens, fresh herbs, and a citrus vinaigrette.',
-    image:
-      'https://images.unsplash.com/photo-1546793665-c74683f339c1?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 3,
-    title: 'Saffron Risotto',
-    category: 'Comfort',
-    time: '45 min',
-    rating: 4.7,
-    description: 'Creamy, rich, and elegant enough for a dinner party.',
-    image:
-      'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 4,
-    title: 'Maple Oat Pancakes',
-    category: 'Breakfast',
-    time: '20 min',
-    rating: 4.8,
-    description: 'Soft pancakes with a warm maple finish and fruit topping.',
-    image:
-      'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=900&q=80',
-  },
-]
+import { Link } from "react-router-dom";
 
 function Dashboard() {
   return (
-    <div className="page dashboard-page">
-      <div className="page-header">
+    <main className="dashboard-page">
+
+      <div className="dashboard-header">
         <div>
-          <p className="eyebrow">Recipe feed</p>
-          <h1>Browse all recipes</h1>
+          <h1>Welcome to RecipeHub! 👋</h1>
+          <p>Manage your recipes and discover something delicious.</p>
         </div>
+
+        <Link to="/add-recipe" className="nav-button">
+          + Add New Recipe
+        </Link>
       </div>
 
-      <div className="recipe-grid">
-        {recipes.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} />
-        ))}
+      <div className="stats-grid">
+
+        <div className="stat-card">
+          <div className="stat-icon">🍽️</div>
+          <h3>120</h3>
+          <p>Available Recipes</p>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon">❤️</div>
+          <h3>24</h3>
+          <p>Favorite Recipes</p>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon">👨‍🍳</div>
+          <h3>12</h3>
+          <p>My Recipes</p>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon">⭐</div>
+          <h3>8</h3>
+          <p>My Reviews</p>
+        </div>
+
       </div>
-    </div>
-  )
+
+      <div className="dashboard-grid">
+
+        <section className="panel">
+          <h2>Recently Added Recipes</h2>
+
+          <div className="activity-list">
+
+            <div className="activity-item">
+              <div className="activity-icon">🍕</div>
+              <div>
+                <strong>Homemade Pizza</strong>
+                <p>Recently added recipe</p>
+              </div>
+            </div>
+
+            <div className="activity-item">
+              <div className="activity-icon">🍝</div>
+              <div>
+                <strong>Creamy Pasta</strong>
+                <p>Recently added recipe</p>
+              </div>
+            </div>
+
+            <div className="activity-item">
+              <div className="activity-icon">🍰</div>
+              <div>
+                <strong>Chocolate Cake</strong>
+                <p>Recently added recipe</p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <section className="panel">
+          <h2>Quick Actions</h2>
+
+          <div className="activity-list">
+            <Link to="/add-recipe" className="view-button">
+              + Create Recipe
+            </Link>
+
+            <Link to="/favorites" className="view-button">
+              ❤️ View Favorites
+            </Link>
+
+            <Link to="/" className="view-button">
+              🔍 Discover Food
+            </Link>
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+  );
 }
 
-export default Dashboard
+export default Dashboard;

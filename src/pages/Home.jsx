@@ -1,92 +1,170 @@
-import { Link } from 'react-router-dom'
-import SearchBar from '../components/SearchBar'
-import RecipeCard from '../components/RecipeCard'
 
-const featuredRecipes = [
-  {
-    id: 1,
-    title: 'Crispy Chicken Tacos',
-    category: 'Mexican',
-    time: '25 min',
-    rating: 4.8,
-    description: 'Loaded with crunchy slaw, lime crema, and smoky seasoning.',
-    image:
-      'https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 2,
-    title: 'Avocado Pesto Pasta',
-    category: 'Italian',
-    time: '20 min',
-    rating: 4.9,
-    description: 'Creamy, bright, and ready in under half an hour.',
-    image:
-      'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 3,
-    title: 'Berry Yogurt Bowl',
-    category: 'Breakfast',
-    time: '10 min',
-    rating: 4.7,
-    description: 'A refreshing sweet-and-salty start to your morning.',
-    image:
-      'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=900&q=80',
-  },
-]
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import { searchRecipes } from "../services/api";
 
 function Home() {
+  const [search, setSearch] = useState("");
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+
+    if (!search.trim()) return;
+
+    setLoading(true);
+    setError("");
+    setRecipes([]);
+
+    try {
+      const results = await searchRecipes(search.trim());
+
+      setRecipes(results);
+
+      if (results.length === 0) {
+        setError("No recipes found. Try another food name.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="page home-page">
-      <section className="hero-section">
-        <div className="hero-copy">
-          <p className="eyebrow">Fresh ideas every day</p>
-          <h1>Discover recipes you’ll want to cook again and again.</h1>
-          <p className="lead">
-            Explore quick meals, family classics, and trending dishes curated for every craving.
+    <>
+      <Navbar />
+
+      <section className="hero">
+        <div className="hero-content">
+
+          <span className="hero-label">
+            DISCOVER. COOK. SHARE.
+          </span>
+
+          <h1>
+            What Would You <br />
+            Like To <span>Cook Today?</span>
+          </h1>
+
+          <p>
+            Search thousands of delicious food ideas
+            and discover how to prepare your favourite meals.
           </p>
-          <div className="hero-actions">
-            <Link to="/dashboard" className="btn btn-primary">
-              Explore Recipes
-            </Link>
-            <Link to="/add-recipe" className="btn btn-light">
-              Share a Recipe
-            </Link>
-          </div>
-        </div>
 
-        <div className="hero-panel">
-          <div className="mini-card top-card">
-            <span>Trending</span>
-            <strong>Healthy Dinner Picks</strong>
-          </div>
-          <div className="mini-card bottom-card">
-            <span>Collection</span>
-            <strong>24 easy meals</strong>
-          </div>
+          <form onSubmit={handleSearch} className="search-form">
+
+            <input
+              type="text"
+              placeholder="Search chicken, pizza, pasta..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+
+<section className="categories-section">
+
+  <div className="section-heading">
+    <div>
+      <span>EXPLORE BY CATEGORY</span>
+      <h2>What Are You Craving?</h2>
+    </div>
+  </div>
+
+  <div className="category-grid">
+
+    {[
+      { name: "Breakfast", icon: "🍳" },
+      { name: "Lunch", icon: "🍛" },
+      { name: "Dinner", icon: "🍲" },
+      { name: "Snacks", icon: "🍟" },
+      { name: "Desserts", icon: "🍰" },
+      { name: "Drinks", icon: "🥤" }
+    ].map((category) => (
+
+      <button
+        className="category-card"
+        key={category.name}
+        type="button"
+        onClick={() => {
+          setSearch(category.name);
+        }}
+      >
+        <span>{category.icon}</span>
+        <h3>{category.name}</h3>
+        <small>Explore recipes</small>
+      </button>
+
+    ))}
+
+  </div>
+
+</section>
+
+
+            <button type="submit">
+              Search Recipes
+            </button>
+
+          </form>
+
         </div>
       </section>
 
-      <section className="search-section">
-        <SearchBar />
-      </section>
+      <section className="recipes-section">
 
-      <section className="featured-section">
         <div className="section-heading">
-          <h2>Popular recipes</h2>
-          <Link to="/dashboard" className="text-link">
-            View all
-          </Link>
+          <div>
+            <span>RECIPE DISCOVERY</span>
+            <h2>Search Results</h2>
+          </div>
         </div>
+
+        {loading && <p>Searching for recipes...</p>}
+
+        {error && <p>{error}</p>}
 
         <div className="recipe-grid">
-          {featuredRecipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+
+          {recipes.map((recipe) => (
+
+            <div className="recipe-card" key={recipe.idMeal}>
+
+              <img
+                src={recipe.strMealThumb}
+                alt={recipe.strMeal}
+              />
+
+              <div className="recipe-info">
+
+                <span className="category">
+                  {recipe.strCategory || "Recipe"}
+                </span>
+
+                <h3>{recipe.strMeal}</h3>
+
+                <Link
+                  to={`/recipe/${recipe.idMeal}`}
+                  className="view-button"
+                >
+                  View Full Recipe
+                </Link>
+
+              </div>
+
+            </div>
+
           ))}
+
         </div>
+
       </section>
-    </div>
-  )
+
+    </>
+  );
 }
 
-export default Home
+export default Home;

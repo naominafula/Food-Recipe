@@ -1,89 +1,125 @@
-import { Link, useParams } from 'react-router-dom'
 
-const recipeData = {
-  1: {
-    id: 1,
-    title: 'Crispy Chicken Tacos',
-    category: 'Mexican',
-    time: '25 min',
-    rating: 4.8,
-    image:
-      'https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?auto=format&fit=crop&w=900&q=80',
-    description:
-      'Tender chicken, crunchy slaw, and a zesty lime crema make this an easy weeknight favorite.',
-    ingredients: ['Chicken thighs', 'Tortillas', 'Cabbage', 'Lime', 'Greek yogurt'],
-    steps: [
-      'Season the chicken with chili powder, cumin, and garlic.',
-      'Cook until golden and fully done, then slice thinly.',
-      'Warm the tortillas and fill with chicken, slaw, and crema.',
-      'Top with salsa and serve immediately.',
-    ],
-  },
-  2: {
-    id: 2,
-    title: 'Avocado Pesto Pasta',
-    category: 'Italian',
-    time: '20 min',
-    rating: 4.9,
-    image:
-      'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80',
-    description:
-      'Creamy pesto and avocado come together for a vibrant, comforting pasta bowl.',
-    ingredients: ['Pasta', 'Avocado', 'Basil', 'Garlic', 'Parmesan'],
-    steps: [
-      'Cook pasta until al dente and reserve a little cooking water.',
-      'Blend avocado, basil, garlic, and parmesan into a smooth pesto.',
-      'Toss the pasta with the pesto and a splash of pasta water.',
-      'Serve with lemon zest and extra parmesan.',
-    ],
-  },
-}
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { getRecipeDetails } from "../services/api";
+import Navbar from "../components/Navbar";
 
 function RecipeDetails() {
-  const { id } = useParams()
-  const recipe = recipeData[id] || recipeData[1]
+  const { id } = useParams();
+
+  const [recipe, setRecipe] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      try {
+        const data = await getRecipeDetails(id);
+
+        if (!data) {
+          setError("Recipe not found.");
+        } else {
+          setRecipe(data);
+        }
+      } catch {
+        setError("Unable to load recipe details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecipe();
+  }, [id]);
+
+  if (loading) return <p>Loading recipe...</p>;
+
+  if (error) return <p>{error}</p>;
+
+  if (!recipe) return null;
+
+  const ingredients = [];
+
+  for (let i = 1; i <= 20; i++) {
+    const ingredient = recipe[`strIngredient${i}`];
+    const measure = recipe[`strMeasure${i}`];
+
+    if (ingredient && ingredient.trim()) {
+      ingredients.push({
+        name: ingredient,
+        measure: measure || ""
+      });
+    }
+  }
 
   return (
-    <div className="page recipe-details-page">
-      <Link to="/dashboard" className="back-link">
-        ← Back to recipes
-      </Link>
+    <>
+      <Navbar />
 
-      <div className="recipe-detail-card">
-        <img src={recipe.image} alt={recipe.title} className="detail-image" />
+      <main className="recipe-details">
 
-        <div className="detail-content">
-          <p className="eyebrow">{recipe.category}</p>
-          <h1>{recipe.title}</h1>
-          <div className="detail-meta">
-            <span>★ {recipe.rating}</span>
-            <span>{recipe.time}</span>
+        <div className="recipe-header">
+
+          <img
+            src={recipe.strMealThumb}
+            alt={recipe.strMeal}
+          />
+
+          <div>
+            <span className="category">
+              {recipe.strCategory}
+            </span>
+
+            <h1>{recipe.strMeal}</h1>
+
+            <p>
+              Cuisine: {recipe.strArea || "Not specified"}
+            </p>
+
+            <p>
+              Cooking time: Not provided by recipe source
+            </p>
           </div>
-          <p>{recipe.description}</p>
 
-          <div className="detail-columns">
-            <div>
-              <h3>Ingredients</h3>
-              <ul>
-                {recipe.ingredients.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3>Instructions</h3>
-              <ol>
-                {recipe.steps.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
-  )
+
+        <div className="recipe-content">
+
+          <section>
+            <h2>Ingredients</h2>
+
+            {ingredients.map((item, index) => (
+              <div className="ingredient" key={index}>
+                <span>{item.name}</span>
+                <strong>{item.measure}</strong>
+              </div>
+            ))}
+
+          </section>
+
+          <section>
+            <h2>Preparation Instructions</h2>
+
+            <p className="instructions">
+              {recipe.strInstructions}
+            </p>
+
+          </section>
+
+        </div>
+
+        {recipe.strYoutube && (
+          <a
+            href={recipe.strYoutube}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Watch Preparation Video
+          </a>
+        )}
+
+      </main>
+    </>
+  );
 }
 
-export default RecipeDetails
+export default RecipeDetails;
